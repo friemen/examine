@@ -11,8 +11,8 @@
 
 
 (defn no-exception
-  "Takes a function that takes one argument and returns the
-   exception message text if any is thrown."
+  "Takes a function with arbitrary number of arguments and returns
+   a constraint that returns the exception message text if any is thrown."
   [f]
   (fn [& args]
     (try (apply f args)

@@ -47,12 +47,13 @@ To get you started try the following in a REPL:
 
 ### Basics
 
-Basically there a three important functions in the examine.core namespace:
+Basically there are three important functions in the examine.core namespace:
 
-* Rule-sets are maps, and can conveniently created by the expression 
-`(rule-set keywords-conditions-and-constraints)`.
-* `(validate rule-set data)` applies all rules of the rule-set to the data 
-and returns a validation results map. 
+* Rule-sets are maps, and can conveniently be created by the expression 
+`(rule-set keywords-conditions-and-constraints)`. See the next section for
+examples.
+* The expression `(validate rule-set data)` applies all rules of the rule-set 
+to the data and returns a validation results map. 
 * To conveniently retrieve human readable texts from validation results,
 the expression `(messages validation-results)` creates a map 
 {path -> seq-of-texts}.
@@ -184,8 +185,8 @@ takes data and returns a map of message seqs.
 Takes a predicate and a message and returns a constraint.
 
 **no-exception** --
-Takes a function that takes one argument and returns the
-exception message text if any is thrown.
+Takes a function with arbitrary number of arguments and returns
+a constraint that returns the exception message text if any is thrown.
 
 **Concrete constraints**:
 
