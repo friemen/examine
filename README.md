@@ -2,7 +2,7 @@
 
 Validating Clojure data.
 
-[![Build Status](https://travis-ci.org/friemen/examine.png?branch=master)](https://travis-ci.org/examine/reactor)
+[![Build Status](https://travis-ci.org/friemen/examine.png?branch=master)](https://travis-ci.org/friemen/examine)
 
 ## Key Features
 
