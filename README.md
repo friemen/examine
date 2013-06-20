@@ -2,6 +2,8 @@
 
 Validating Clojure data.
 
+[![Build Status](https://travis-ci.org/friemen/examine.png?branch=master)](https://travis-ci.org/examine/reactor)
+
 ## Key Features
 
 * Declarative style for formulating constraints.
