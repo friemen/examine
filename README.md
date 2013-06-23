@@ -24,26 +24,27 @@ Include in your project.clj the following dependency
 ### Getting started
 
 To get you started try the following in a REPL:
+```clojure
+(use 'examine.core)
+;= nil
 
-    (use 'examine.core)
-    ;= nil
+(use 'examine.constraints)
+;= nil
 
-    (use 'examine.constraints)
-    ;= nil
+(def data {:name "Donald Duck"
+           :zipcode "1234"
+           :city "Duckberg"})
+;= #'user/data
 
-    (def data {:name "Donald Duck"
-               :zipcode "1234"
-               :city "Duckberg"})
-    ;= #'user/data
+(use 'examine.constraints)
+;= nil
 
-    (use 'examine.constraints)
-    ;= nil
+(defvalidator examine-address :zipcode (matches-re #"\d{5}"))
+;= #'user/examine-address
 
-    (defvalidator examine-address :zipcode (matches-re #"\d{5}"))
-    ;= #'user/examine-address
-
-    (examine-address data)
-    ;= {:zipcode ("Must match pattern \\d{5}")}
+(examine-address data)
+;= {:zipcode ("Must match pattern \\d{5}")}
+```
 
 ### Basics
 
@@ -65,30 +66,30 @@ function that returns a map with human readable texts.
 ### Rule set specification
 
 Examples for rule-set specifications:
-
-    (def r (rule-set :firstname required is-string
-                     :lastname is-string))
-
+```clojure
+(def r (rule-set :firstname required is-string
+                 :lastname is-string))
+```
 applies constraint functions `required` and `is-string` to a value 
 retrieved using `:firstname` keyword. A value retrieved by keyword
 `:lastname` is only checked by `is-string`.
 
-
-    (def r (rule-set [:from :to] min-le-max))
-
+```clojure
+(def r (rule-set [:from :to] min-le-max))
+```
 applies the two-arg constraint function 'min-le-max' to the
 arguments retrieved by keywords `:from` and `:to`.
 
-
-    (def r (rule-set [[:address :zipcode]] (matches-re #"\d{5}"))
-
+```clojure
+(def r (rule-set [[:address :zipcode]] (matches-re #"\d{5}"))
+```
 applies the regex constraint `matches-re` to a value retrieved
 by navigating a data structure using `:address` and `:zipcode`
 in that order.
 
-
-    (def r (rule-set :age is-number number? (in-range 0 120))
-
+```clojure
+(def r (rule-set :age is-number number? (in-range 0 120))
+```
 applies first the `is-number` constraint, and applies the `in-range` 
 constraint only if the predicate `number?` returns true.
 
@@ -220,7 +221,7 @@ that uses the default language and a corresponding property file content for
 translation.
 
 
-## License
+# License
 
 Copyright 2013 F.Riemenschneider
 
