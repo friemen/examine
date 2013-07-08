@@ -17,7 +17,7 @@ Validating Clojure data.
 
 ## Usage
 
-Include in your project.clj the following dependency
+Include the following dependency in your project.clj 
 
     [examine "1.0.0"]
 
@@ -81,7 +81,7 @@ applies the two-arg constraint function 'min-le-max' to the
 arguments retrieved by keywords `:from` and `:to`.
 
 ```clojure
-(def r (rule-set [[:address :zipcode]] (matches-re #"\d{5}"))
+(def r (rule-set [[:address :zipcode]] (matches-re #"\d{5}")))
 ```
 applies the regex constraint `matches-re` to a value retrieved
 by navigating a data structure using `:address` and `:zipcode`
