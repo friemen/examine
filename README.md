@@ -19,7 +19,7 @@ Validating Clojure data.
 
 Include the following dependency in your project.clj 
 
-    [examine "1.0.0"]
+    [examine "1.1.0"]
 
 ### Getting started
 
