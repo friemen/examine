@@ -50,6 +50,13 @@
   (from-pred integer? "integer-required"))
 
 
+(def is-date
+  (from-pred #(some-> % .getClass .getName #{"java.util.Date"
+                                             "org.joda.time.DateTime"
+                                             "java.util.GregorianCalendar"})
+             "date-required"))
+
+
 (defn is-boolean
   "Constraint-fn that passes if value is true or false."
   [x]

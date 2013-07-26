@@ -18,11 +18,17 @@
 
 
 (deftest is-boolean-test
-  (are [msg               x] (= (is-boolean x))
+  (are [msg               x] (= msg (is-boolean x))
        "boolean-required" 0
        "boolean-required" nil
        nil                true
        nil                false))
+
+(deftest is-date-test
+  (are [msg               x] (= msg (is-date x))
+       "date-required"    nil
+       "date-required"    "10.07.2013"
+       nil                (java.util.Date.)))
 
 
 (deftest max-length-test
