@@ -9,6 +9,14 @@
          nil 3 4)))
 
 
+(deftest not-blank-test
+  (are [r       x] (= r (not-blank? x))
+       true     "Foo"
+       true     (java.util.Date.)
+       false    ""
+       false    nil))
+
+
 (deftest from-exception-test
   (let [f (fn [t] (when t (throw (IllegalArgumentException. "BOOM!"))))
         cex (no-exception f)]

@@ -51,29 +51,21 @@
   (map (partial data-provider data) paths))
 
 
-(defn- map-while
-  "Creates a seq by applying transform-fn to every item from coll
-   until application of pred to a transformed value yields false."
-  [transform-fn pred coll]
-  (let [s (seq coll)]
-    (when-let [x (first s)]
-      (let [y (transform-fn x)]
-        (if (pred y)
-          (cons y (map-while transform-fn pred (rest s)))
-          (list))))))
-
-
 (defn- apply-constraints
   "Applies the constraints from consconds to the values. The arity of
    the functions in consconds must be at most the number of values.
-   Whenever a condition returns false all subsequent constraints are ignored."
+   Whenever a condition returns false all subsequent constraints are ignored.
+   Returns a map of {constraint-fn -> message-or-nil}."
   [consconds values]
   (->> consconds
-       (map-while (fn [c]
-                    [c (apply c values)])
-                  (comp not false? second))
-       (filter (comp not true? second))
-       (into {})))
+       (reduce (fn [[msgs ignore?] c]
+                 (let [msg (if ignore? nil (apply c values))]
+                   (case msg
+                         false [msgs true]
+                         true [msgs ignore?]
+                         [(assoc msgs c msg) ignore?])))
+               [{} false])
+       first))
 
 
 (defn validate

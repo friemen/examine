@@ -30,14 +30,6 @@
          13     [:bam 1])))
 
 
-(deftest map-while-test
-  (are [r xs] (= (#'examine.core/map-while #(/ % 2) integer? xs))
-       '() []
-       '() [1]
-       '(1 2 3) [2 4 6]
-       '(1 2 3) [2 4 6 5 2 4]))
-
-
 (deftest paths-msgs-pairs-test
   (are [pairs prefix paths] (= pairs (#'examine.core/paths-msgs-pairs prefix paths '("!")))
        '([:foo ("!")]) nil [:foo]
@@ -129,11 +121,12 @@
        {:foo 42}                 {:foo 42}                 nil
        {:foo 43}                 {:foo 42}                 {:foo 43}
        {:foo {:bar 43 :baz 10}}  {:foo {:bar 42 :baz 10}}  {:foo {:bar 43}})
-  (let [rules (rule-set :foo is-number :bar is-string)
-        vr1 (validate map-data-provider rules {:foo "" :bar ""})
+  (let [rules (rule-set :foo is-number :bar is-string :baz not-blank? (min-length 4))
+        vr1 (validate map-data-provider rules {:foo "" :bar "" :baz "123"})
         vr2 (validate map-data-provider rules {:foo 42 :bar ""})]
     (is (= {} (messages (update vr1 vr2))))
-    (is (= {:foo '("Must be a number")} (messages (update vr2 vr1))))))
+    (is (= {:foo '("Must be a number")
+            :baz '("Min 4 characters required")} (messages (update vr2 vr1))))))
 
 
 (defvalidator v :foo is-string)

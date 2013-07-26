@@ -206,6 +206,13 @@ a constraint that returns the exception message text if any is thrown.
 * for-each f -- Applies constraint-fn to cartesian product of collections
 * min-le-max -- First value is not greater than second value
 
+**Additional predicates**:
+
+Predicates stop further validation when they return false.
+
+ * not-nil? -- False if value is nil
+ * not-blank? -- False if value is empty string or nil
+
 
 ### Namespace internationalization
 

@@ -22,7 +22,15 @@
 
 (def not-nil?
   "Returns true if value is not nil."
-  (comp not nil?))
+  (complement nil?))
+
+
+(defn not-blank?
+  "Returns true if value is not nil and not an empty string"
+  [x]
+  (if (string? x)
+    (> (count x) 0)
+    (not-nil? x)))
 
 
 (def required
