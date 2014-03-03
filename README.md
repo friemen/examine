@@ -197,7 +197,7 @@ a constraint that returns the exception message text if any is thrown.
 * is-number -- Value is a number
 * is-integer -- Value is an integer
 * is-boolean -- Value is true or false
-* is-date -- Value is of time DateTime, Date or Calendar
+* is-date -- Value is of type Joda DateTime, Date or GregorianCalendar
 * min-length n -- Collection or string has at least n items/characters
 * max-length n -- Collection or string has at most n items/characters
 * in-range min max -- Number is at least min, at most max

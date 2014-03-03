@@ -7,7 +7,7 @@
   
   :scm {:name "git"
         :url "https://github.com/friemen/examine"}
-  :repositories [["clojars" {:url "https://clojars.com/repo"
+  :repositories [["clojars" {:url "https://clojars.org/repo"
                              :creds :gpg}]]
   :codox {:src-dir-uri "https://github.com/friemen/examine/blob/master"
           :src-linenum-anchor-prefix "L"})
