@@ -6,9 +6,10 @@ Validating Clojure data.
 
 [![Clojars Project](http://clojars.org/examine/latest-version.svg)](http://clojars.org/examine)
 
+Include a dependency to the latest version as shown above in your project.clj.
+
 [API docs](https://friemen.github.com/examine)
 
-Include a dependency to the latest version as shown above in your project.clj.
 
 ## Key Features
 
@@ -23,7 +24,6 @@ Include a dependency to the latest version as shown above in your project.clj.
 
 ## Usage
 
-
 ### Getting started
 
 To get you started try the following in a REPL:
@@ -31,15 +31,12 @@ To get you started try the following in a REPL:
 (require '[examine.core :refer :all])
 ;= nil
 
-(require '[examine.constraints :refer :all])
-;= nil
-
 (def data {:name "Donald Duck"
            :zipcode "1234"
            :city "Duckberg"})
 ;= #'user/data
 
-(use 'examine.constraints)
+(require '[examine.constraints :refer :all])
 ;= nil
 
 (defvalidator examine-address :zipcode (matches-re #"\d{5}"))
@@ -234,6 +231,6 @@ translation.
 
 # License
 
-Copyright 2013 F.Riemenschneider
+Copyright 2013, 2014 F.Riemenschneider
 
 Distributed under the Eclipse Public License, the same as Clojure.
