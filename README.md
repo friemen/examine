@@ -4,6 +4,12 @@ Validating Clojure data.
 
 [![Build Status](https://travis-ci.org/friemen/examine.png?branch=master)](https://travis-ci.org/friemen/examine)
 
+[![Clojars Project](http://clojars.org/examine/latest-version.svg)](http://clojars.org/examine)
+
+[API docs](https://friemen.github.com/examine)
+
+Include a dependency to the latest version as shown above in your project.clj.
+
 ## Key Features
 
 * Declarative style for formulating constraints.
@@ -17,18 +23,15 @@ Validating Clojure data.
 
 ## Usage
 
-Include the following dependency in your project.clj 
-
-    [examine "1.1.0"]
 
 ### Getting started
 
 To get you started try the following in a REPL:
 ```clojure
-(use 'examine.core)
+(require '[examine.core :refer :all])
 ;= nil
 
-(use 'examine.constraints)
+(require '[examine.constraints :refer :all])
 ;= nil
 
 (def data {:name "Donald Duck"
