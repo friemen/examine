@@ -34,7 +34,10 @@ To get you started try the following in a REPL:
            :city "Duckberg"})
 ;= #'user/data
 
-(require '[examine.constraints :as :c])
+(require '[examine.core :as e])
+;= nil
+
+(require '[examine.constraints :as c)
 ;= nil
 
 (require '[examine.macros :refer :all])
@@ -47,18 +50,32 @@ To get you started try the following in a REPL:
 ;= {:zipcode ("Must match pattern \\d{5}")}
 ```
 
+To require the necessary namespaces within your Clojure ns-form use
+
+```clojure
+(:require [examine [core :as e] [constraints :as c] [macros :refer :all]])
+```
+
+For ClojureScript use the following snippet:
+
+```clojure
+  (:require [examine.core :as e]
+            [examine.constraints :as c])
+  (:require-macros [examine.macros :refer [defvalidator]])
+```
+
 ### Basics
 
 Basically there are three important functions in the examine.core namespace:
 
-* Rule-sets are maps, and can conveniently be created by the expression 
-`(rule-set keywords-conditions-and-constraints)`. See the next section for
-examples.
-* The expression `(validate rule-set data)` applies all rules of the rule-set 
-to the data and returns a validation results map. 
-* To conveniently retrieve human readable texts from validation results,
-the expression `(messages validation-results)` creates a map 
-{path -> seq-of-texts}.
+* Rule-sets are maps, and can conveniently be created by the
+  expression `(rule-set keywords-conditions-and-constraints)`. See the
+  next section for examples.
+* The expression `(validate rule-set data)` applies all rules of the
+  rule-set to the data and returns a validation results map.
+* To conveniently retrieve human readable texts from validation
+  results, the expression `(messages validation-results)` creates a
+  map {path -> seq-of-texts}.
 
 The `examine.macros/defvalidator` macro combines those functions to define a 1-arg 
 function that returns a map with human readable texts.
@@ -67,6 +84,7 @@ function that returns a map with human readable texts.
 ### Rule set specification
 
 Examples for rule-set specifications:
+
 ```clojure
 (def r (rule-set :firstname required is-string
                  :lastname is-string))
@@ -93,6 +111,26 @@ in that order.
 ```
 applies first the `is-number` constraint, and applies the `in-range` 
 constraint only if the predicate `number?` returns true.
+
+You can define ad-hoc constraints like this
+
+```clojure.
+(defvalidator check-numbers
+  [[:foo :n1] :n2]
+  #(if (< %1 %2) "n1 must not be below n2"))
+```
+
+which behaves like this
+
+```clojure
+(check-address {:foo {:n1 1} :n2 2})
+;= {[:foo :n1] ("n1 must not be below n2"),
+;   :n2 ("n1 must not be below n2")}
+```
+You get the same message for both values because any one of them
+could be erroneous.
+
+
 
 ### Samples
 
@@ -138,7 +176,7 @@ If a message is nil then the validation for data-path + constraint
 was successful.
 
 
-## API
+## API Overview
 
 Namespaces:
 
@@ -146,7 +184,7 @@ Namespaces:
 * constraints -- Contains concrete constraints.
 * internationalization -- Contains default localizer using resource bundles. 
 
-### Namespace validation
+### Namespace core
 
 **map-data-provider** --
 Returns a value from a possibly nested data structure
@@ -177,8 +215,11 @@ that apply to the given path.
 **validate** --
 Takes a value-provider, a rule-set and data and returns a validation-result.
 
-**defvalidator** -- Defines a function in the current namespace that
-takes data and returns a map of message seqs.
+### Namespace macros
+
+**defvalidator** --
+Defines a function in the current namespace that takes data and returns
+a map of message seqs.
 
 
 ### Namespace constraints
@@ -218,14 +259,15 @@ Predicates stop further validation when they return false.
 ### Namespace internationalization
 
 **load-messages-map** -- Loads a property file messages_XY.properties from classpath 
-and returns a map.
+and returns a map (only Clojure, not ClojureScript).
 
-**default-language** -- Returns the language code using Javas Locale.getDefault.
+**default-language** -- Returns the language code using Javas
+  `Locale.getDefault` (Clojure) or `goog.LOCALE` (ClojureScript).
 
 **localize** -- Takes a messages map and translates the key to the corresponding
 human readable text.
 
-**\*default-localizer\*** -- A dynamically scoped var that points to a localizer
+**\*default-localizer\*** -- A var that points to a localizer
 that uses the default language and a corresponding property file content for
 translation.
 

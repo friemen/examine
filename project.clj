@@ -13,7 +13,7 @@
   :codox {:defaults {}
           :sources ["src/clj" "target/classes"]
           :exclude []
-          :src-uri-mapping {#"target/classes" #(str "src/" % "x")}
+          :src-uri-mapping {#"target/classes" #(str "src/cljx/" % "x")}
           :src-dir-uri "https://github.com/friemen/examine/blob/master/"
           :src-linenum-anchor-prefix "L"}
   :scm {:name "git"

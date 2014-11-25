@@ -1,6 +1,6 @@
 (ns examine.macros
   "Macros for convenient validator creation"
-  (:require [examine.core :refer [messages rule-set validate]]
+  (:require [examine.core]
             [examine.internationalization :as i18n]))
 
 
@@ -12,6 +12,6 @@
    An empty map represents valid data."
   [sym & specs]
   `(defn ~sym [data#]
-     (let [rules# (rule-set ~@specs)]
-       (messages i18n/default-localizer (validate rules# data#)))))
+     (let [rules# (examine.core/rule-set ~@specs)]
+       (examine.core/messages i18n/default-localizer (examine.core/validate rules# data#)))))
 
