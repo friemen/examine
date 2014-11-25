@@ -1,5 +1,13 @@
 (ns examine.constraints
-  "Functions that yield constraints and a set of default constraints")
+  "Functions that yield constraints and a set of default constraints"
+  #+cljs (:import [goog.date Date]))
+
+
+(defn of-type?
+  [typenames x]
+  (let [ts (set typenames)]
+    #+clj (some-> x .getClass .getName ts)
+    #+cljs (some-> x .-constructor .name ts)))
 
 
 (defn from-pred
@@ -17,7 +25,10 @@
   (fn [& args]
     (try (apply f args)
          nil
-         (catch Exception ex ["exception-thrown" (.getMessage ex)]))))
+         (catch #+clj Exception #+cljs js/Error ex
+           ["exception-thrown"
+            #+clj (.getMessage ex)
+            #+cljs (.-message ex)]))))
 
 
 (def not-nil?
@@ -59,9 +70,10 @@
 
 
 (def is-date
-  (from-pred #(some-> % .getClass .getName #{"java.util.Date"
-                                             "org.joda.time.DateTime"
-                                             "java.util.GregorianCalendar"})
+  (from-pred #+clj #(some-> % .getClass .getName #{"java.util.Date"
+                                                   "org.joda.time.DateTime"
+                                                   "java.util.GregorianCalendar"})
+             #+cljs #(= (type %) goog.date.Date)
              "date-required"))
 
 
@@ -114,7 +126,11 @@
   [re]
   (fn [x]
     (if (string? x)
-      (when-not (re-matches re x) ["no-re-match" (str re)])
+      (when-not (re-matches re x)
+        ["no-re-match"
+         #+clj (str re)
+         #+cljs (let [s (str re)]
+                  (.substr s 1 (- (.-length s) 2)))])
       "string-required")))
 
 

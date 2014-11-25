@@ -1,15 +1,20 @@
 (ns examine.core
   "Function for creation of rule-sets, validating, and using validation results"
+  (:refer-clojure :exclude [update])
   (:require [clojure.set :as cs]
             [examine.internationalization :as i18n])
-  (:import [java.text MessageFormat]))
+  (:import #+clj [java.text MessageFormat]
+           #+cljs [goog.i18n MessageFormat]))
 
 
 (defn- as-vector
   "Returns a vector from xs.
    If xs is not sequential a wrapping vector is created."
   [xs]
-  (if (vector? xs) xs (if (sequential? xs) (vec xs) (vector xs))))
+  (cond
+   (vector? xs) xs
+   (sequential? xs) (vec xs)
+   :else (vector xs)))
 
 
 (defn rule-set
@@ -148,7 +153,12 @@
     (let [[text args] (if (vector? msg) [(first msg) (rest msg)] [msg (list)])
           localized-text (localizer-fn text)]
       (if (and localized-text args)
-        (MessageFormat/format localized-text (to-array args))
+        #+clj (MessageFormat/format localized-text (to-array args))
+        #+cljs (-> (MessageFormat. localized-text)
+                   (.format (->> args
+                                 (map vector (range))
+                                 (into {})
+                                 (clj->js))))
         text))
     nil))
 
@@ -157,7 +167,7 @@
   "Returns a map {path -> sequence-of-human-readable-strings}.
    If the localizer-fn is not given the default-localizer is used."
   ([validation-results]
-     (messages i18n/*default-localizer* validation-results))
+     (messages i18n/default-localizer validation-results))
   ([localizer-fn validation-results]
      (->> validation-results
           unpack
@@ -173,7 +183,7 @@
   "Returns a sequence of human readable strings for the given path.
    If the localizer-fn is not given the default-localizer is used."
   ([path validation-results]
-     (messages-for i18n/*default-localizer* path validation-results))
+     (messages-for i18n/default-localizer path validation-results))
   ([localizer-fn path validation-results]
      (get (messages localizer-fn validation-results) path)))
 
@@ -196,15 +206,4 @@
           old-map
           new-map))
 
-
-(defmacro defvalidator
-  "Yields a defn for a one-argument validator function.
-   The validator function returns a localized messages map,
-   using the default localizer. The data is accessed by
-   the map-data-provider.
-   An empty map represents valid data."
-  [sym & specs]
-  `(defn ~sym [data#]
-     (let [rules# (rule-set ~@specs)]
-       (messages i18n/*default-localizer* (validate rules# data#)))))
 

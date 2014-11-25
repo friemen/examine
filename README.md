@@ -1,6 +1,6 @@
 # examine
 
-Validating Clojure data.
+Validating Clojure(Script) data.
 
 [![Build Status](https://travis-ci.org/friemen/examine.png?branch=master)](https://travis-ci.org/friemen/examine)
 
@@ -27,19 +27,20 @@ Include a dependency to the latest version as shown above in your project.clj.
 ### Getting started
 
 To get you started try the following in a REPL:
-```clojure
-(require '[examine.core :refer :all])
-;= nil
 
+```clojure
 (def data {:name "Donald Duck"
            :zipcode "1234"
            :city "Duckberg"})
 ;= #'user/data
 
-(require '[examine.constraints :refer :all])
+(require '[examine.constraints :as :c])
 ;= nil
 
-(defvalidator examine-address :zipcode (matches-re #"\d{5}"))
+(require '[examine.macros :refer :all])
+;= nil
+
+(defvalidator examine-address :zipcode (c/matches-re #"\d{5}"))
 ;= #'user/examine-address
 
 (examine-address data)
@@ -59,7 +60,7 @@ to the data and returns a validation results map.
 the expression `(messages validation-results)` creates a map 
 {path -> seq-of-texts}.
 
-The `defvalidator` macro combines those functions to define a 1-arg 
+The `examine.macros/defvalidator` macro combines those functions to define a 1-arg 
 function that returns a map with human readable texts.
 
 
@@ -95,7 +96,7 @@ constraint only if the predicate `number?` returns true.
 
 ### Samples
 
-See the [samples](test/examine/samples.clj) to learn more about
+See the [samples](test/examine/samples.cljx) to learn more about
 how examine can be used.
 
 ## Concepts

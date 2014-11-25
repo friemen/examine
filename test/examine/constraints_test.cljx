@@ -1,6 +1,13 @@
 (ns examine.constraints-test
-  (:use [examine.constraints]
-        [clojure.test]))
+  (:require [examine.constraints :refer [for-each from-pred in-range is-boolean is-date is-number is-string
+                                         matches-re max-length min-length min-le-max not-blank?
+                                         no-exception one-of]]
+        #+clj [clojure.test :refer :all]
+        #+cljs [cemerick.cljs.test :as t])
+  #+cljs (:require-macros [cemerick.cljs.test :refer [is are deftest testing]])
+  #+clj (:import [java.util Date])
+  #+cljs (:import [goog.date Date]))
+
 
 (deftest from-pred-test
   (let [lte (from-pred <= "Min value must be lower or equal than max value")]
@@ -12,13 +19,15 @@
 (deftest not-blank-test
   (are [r       x] (= r (not-blank? x))
        true     "Foo"
-       true     (java.util.Date.)
+       true     (Date.)
        false    ""
        false    nil))
 
 
 (deftest from-exception-test
-  (let [f (fn [t] (when t (throw (IllegalArgumentException. "BOOM!"))))
+  (let [f (fn [t] (when t
+                    #+clj (throw (IllegalArgumentException. "BOOM!"))
+                    #+cljs (throw (js/Error. "BOOM!"))))
         cex (no-exception f)]
     (are [msg                         throw-ex] (= msg (cex throw-ex))
          nil                          false
@@ -36,7 +45,7 @@
   (are [msg               x] (= msg (is-date x))
        "date-required"    nil
        "date-required"    "10.07.2013"
-       nil                (java.util.Date.)))
+       nil                (Date.)))
 
 
 (deftest max-length-test

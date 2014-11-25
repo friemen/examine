@@ -1,13 +1,18 @@
 (ns examine.samples
   (:require [examine.core :as e]
-            [examine.constraints :as c])
-  (:use [clojure.test]))
+            #+clj [examine.macros :refer [defvalidator]]
+            [examine.constraints :as c]
+            #+clj [clojure.test :refer :all]
+            #+cljs [cemerick.cljs.test :as t])
+  #+cljs (:require-macros [examine.macros :refer [defvalidator]]
+                          [cemerick.cljs.test :refer [is are deftest testing]]))
+
 
 ;; The first sample shows how to use the defvalidator macro.
 
 (defrecord Person [firstname lastname])
 
-(e/defvalidator examine-contact
+(defvalidator examine-contact
   
   ; firstname is not required, but - if set - must be a string
   :firstname c/not-nil? c/is-string
@@ -20,9 +25,8 @@
   (is (= (examine-contact (Person. nil "Bar"))
          {}))
   
-  (is (= (examine-contact (Person. nil nil))
-         {:lastname '("A value is required"
-                      "Must be a string")}))
+  (is (every? #{"A value is required" "Must be a string"}
+              (-> (Person. nil nil) (examine-contact) :lastname)))
   
   (is (= (examine-contact (Person. 42 13))
          {:firstname '("Must be a string")

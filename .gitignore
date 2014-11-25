@@ -15,3 +15,5 @@ pom.xml
 .project
 .classpath
 /pom.xml.asc
+/.nrepl-port
+/.repl/

@@ -1,6 +1,15 @@
 (ns examine.core-test
-  (:use [clojure.test]
-        [examine core constraints]))
+  (:refer-clojure :exclude [update])
+  (:require #+clj [clojure.test :refer :all]
+            #+cljs [cemerick.cljs.test :as t]
+            #+clj [examine.core :refer :all]
+            #+clj [examine.macros :refer [defvalidator]]
+            #+cljs [examine.core :refer [map-data-provider messages messages-for rule-set sub-set update validate]]
+            [examine.constraints :refer [for-each from-pred in-range is-boolean is-date is-number is-string
+                                         matches-re max-length min-length min-le-max not-blank?
+                                         no-exception one-of]])
+  #+cljs (:require-macros [cemerick.cljs.test :refer (is are deftest testing)]
+                          [examine.macros :refer [defvalidator]]))
 
 
 (deftest rule-set-test
@@ -29,7 +38,7 @@
          42     :baz
          13     [:bam 1])))
 
-
+#+clj
 (deftest paths-msgs-pairs-test
   (are [pairs prefix paths] (= pairs (#'examine.core/paths-msgs-pairs prefix paths '("!")))
        '([:foo ("!")]) nil [:foo]
@@ -40,7 +49,7 @@
        '([[:baz :bar :foo] ("!")]) [[:baz :bar]] [:foo]
        '([[:foo :baz] ("!")] [:bar ("!")]) [:foo :bar] [:baz []]))
 
-
+#+clj
 (deftest unpack-test
   (are [r   vrs] (= r (#'examine.core/unpack vrs))
        '() {}
@@ -96,7 +105,7 @@
                                              :contacts [{:name "Donald" :age 40}
                                                         {:name "Mickey" :age 101}]})))
 
-
+#+clj
 (deftest render-test
   (are [text        msg] (= text (#'examine.core/render identity msg))
        "foo"        "foo"
