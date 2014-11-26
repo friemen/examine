@@ -66,7 +66,7 @@ For ClojureScript use the following snippet:
 
 ### Basics
 
-Basically there are three important functions in the examine.core namespace:
+There are three important functions in the examine.core namespace:
 
 * Rule-sets are maps, and can conveniently be created by the
   expression `(rule-set keywords-conditions-and-constraints)`. See the
@@ -114,7 +114,7 @@ constraint only if the predicate `number?` returns true.
 
 You can define ad-hoc constraints like this
 
-```clojure.
+```clojure
 (defvalidator check-numbers
   [[:foo :n1] :n2]
   #(if (< %1 %2) "n1 must not be below n2"))
@@ -192,7 +192,7 @@ using the given path. Path can either be a keyword or a vector of keywords
 and indexes (as expected by get-in).
 
 **has-errors?** --
-Returns true if the given validation-result contains no messages.
+Returns true if the given validation-result contains at least one message.
 
 **rule-set** --
 Creates a rule-set from keywords, constraints and conditions.
