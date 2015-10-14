@@ -1,4 +1,4 @@
-(defproject examine "1.2.0"
+(defproject examine "1.2.1"
   :description "Validating Clojure data"
   :url "https://github.com/friemen/examine"
   :license {:name "Eclipse Public License"
@@ -29,7 +29,8 @@
                                   (cemerick.austin.repls/cljs-repl (reset! cemerick.austin.repls/browser-repl-env
                                                                            (cemerick.austin/repl-env))))]}
              :1.5 {:dependencies [[org.clojure/clojure "1.5.1"]]}
-             :1.7 {:dependencies [[org.clojure/clojure "1.7.0-alpha4"]]}}
+             :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}
+             :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}}
 
   :cljsbuild {:test-commands {"unit-tests" ["phantomjs" :runner "target/testable.js"]}
               :builds [{:source-paths ["src/clj" "target/classes" "target/test-classes"]
@@ -38,7 +39,7 @@
                                    :source-map "target/testable.js.map"
                                    :optimizations :advanced
                                    :static-fns true}}]}
-  
+
   :cljx {:builds [{:source-paths ["src/cljx"]
                    :output-path "target/classes"
                    :rules :clj}
@@ -51,7 +52,7 @@
                   {:source-paths ["test"]
                    :output-path "target/test-classes"
                    :rules :cljs}]}
-  
-  :aliases {"all" ["with-profile" "+dev:+1.5:+1.7"]
+
+  :aliases {"all" ["with-profile" "+dev:+1.5:+1.6:+1.7"]
             "deploy" ["do" "clean," "deploy" "clojars"]
             "test" ["do" "clean," "test," "cljsbuild" "test"]})

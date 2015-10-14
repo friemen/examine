@@ -1,5 +1,6 @@
 (ns examine.constraints
   "Functions that yield constraints and a set of default constraints"
+  (:require [clojure.string :as str])
   #+cljs (:import [goog.date Date]))
 
 
@@ -36,17 +37,14 @@
   (complement nil?))
 
 
-(defn not-blank?
+(def not-blank?
   "Returns true if value is not nil and not an empty string"
-  [x]
-  (if (string? x)
-    (> (count x) 0)
-    (not-nil? x)))
+  (comp (complement str/blank?) str))
 
 
 (def required
   "Constraint-fn that passes if value is not nil."
-  (from-pred not-nil? "value-required"))
+  (from-pred not-blank? "value-required"))
 
 
 (def has-items
@@ -114,7 +112,7 @@
   "Returns constraint-fn that passes if value is one
    of the specified values."
   [& values]
-  (let [vset (set values)]    
+  (let [vset (set values)]
     (fn [x]
       (when-not (vset x)
         ["unexpected-value" values]))))
@@ -164,5 +162,3 @@
                     [(vec (map #(if (coll-args %2) %1 []) indexes args))
                      {f (apply f values)}])))
            (into {})))))
-
-
