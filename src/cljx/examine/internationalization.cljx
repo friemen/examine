@@ -4,6 +4,19 @@
   (:import #+clj [java.util Locale]))
 
 
+#+clj
+(defn- load-props
+  [resource-name]
+  (with-open [^java.io.Reader reader (io/reader (io/resource resource-name))]
+    (let [props (java.util.Properties.)]
+      (.load props reader)
+      (into {} (for [[k v] props] [k (read-string v)])))))
+
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Public API
+
+
 (defn default-language
   "Returns the language code using Javas Locale.getDefault."
   []
@@ -12,16 +25,8 @@
 
 
 #+clj
-(defn- load-props
-  [resource-name]
-  (with-open [^java.io.Reader reader (io/reader (io/resource resource-name))] 
-    (let [props (java.util.Properties.)]
-      (.load props reader)
-      (into {} (for [[k v] props] [k (read-string v)])))))
-
-#+clj
 (defn load-messages-map
-  "Loads a property file messages_XY.properties from classpath 
+  "Loads a property file messages_XY.properties from classpath
    and returns a map."
   [language-code]
   (load-props (str "messages_" language-code ".properties")))

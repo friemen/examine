@@ -9,82 +9,12 @@
 
 (defn- as-vector
   "Returns a vector from xs.
-   If xs is not sequential a wrapping vector is created."
+  If xs is not sequential a wrapping vector is created."
   [xs]
   (cond
    (vector? xs) xs
    (sequential? xs) (vec xs)
    :else (vector xs)))
-
-
-(defn rule-set
-  "Creates a rule-set from the keywords and functions (constraints as well as
-   conditions).
-   Examples:
-   TODO"
-  [ & specs]
-  (->> specs
-       (partition-by fn?)
-       (partition 2)
-       (map (fn [[paths consconds]]
-              [(-> paths first as-vector) (vec consconds)]))
-       (into {})))
-
-
-(defn sub-set
-  "Returns the subset of the rule-set that contains only those
-   rules that reference at least one of the paths given in ps."
-  [rule-set & ps]
-  (let [ps-set (set ps)]
-    (->> rule-set
-         (filter (fn [[paths consconds]]
-                   (not (empty? (cs/intersection ps-set (set paths))))))
-         (into {}))))
-
-
-(defn map-data-provider
-  "Default data provider that uses get or get-in to retrieve
-   data from a map/record."
-  [m keyword-or-vector]
-  (let [g (if (vector? keyword-or-vector) get-in get)]
-    (g m keyword-or-vector)))
-
-
-(defn- values
-  "Returns the corresponding values for the given paths."
-  [data-provider paths data]
-  (map (partial data-provider data) paths))
-
-
-(defn- apply-constraints
-  "Applies the constraints from consconds to the values. The arity of
-   the functions in consconds must be at most the number of values.
-   Whenever a condition returns false all subsequent constraints are ignored.
-   Returns a map of {constraint-fn -> message-or-nil}."
-  [consconds values]
-  (->> consconds
-       (reduce (fn [[msgs ignore?] c]
-                 (let [msg (if ignore? nil (apply c values))]
-                   (case msg
-                         false [msgs true]
-                         true [msgs ignore?]
-                         [(assoc msgs c msg) ignore?])))
-               [{} false])
-       first))
-
-
-(defn validate
-  "Creates validation results by applying the constraints of the rule-set
-   to the data. If the data-provider arg is missing the map-data-provider
-   is used."
-  ([rule-set data]
-     (validate map-data-provider rule-set data))
-  ([data-provider rule-set data]
-     (->> rule-set
-          (map (fn [[paths consconds]]
-                 (let [vs (values data-provider paths data)]
-                   [paths (apply-constraints consconds vs)])))
-          (into {}))))
 
 
 (defn- without-nil
@@ -93,7 +23,7 @@
   (seq (disj (set xs) nil)))
 
 
-(defn path-msgs-pair
+(defn- path-msgs-pair
   [msgs prefix path]
   (vector (let [p (if (= [] path)
                     prefix
@@ -115,21 +45,21 @@
       (map (partial path-msgs-pair msgs) prefix paths)
       (map (partial path-msgs-pair msgs prefix) paths))))
 
-; prefix                          paths
-; [:foo :bar]  {2-arg-constraint {[:baz] {1-arg-constraint "msg"}}} <-- nonsense
-;
-; [:foo]       {1-arg-constraint {[:bar :baz] {2-arg-constraint "msg"}} <-- nested validation
-; => [[:foo :bar] ("msg")] [[:foo :baz] ("msg")]
-;
-; [:max-age :contacts] {2-arg-constraint {[[] 0] {2-arg-constraint}}} <-- collection 
-; => [:max-age ("msg")] [[:contacts 0] ("msg")] 
+;; prefix                          paths
+;; [:foo :bar]  {2-arg-constraint {[:baz] {1-arg-constraint "msg"}}} <-- nonsense
+;;
+;; [:foo]       {1-arg-constraint {[:bar :baz] {2-arg-constraint "msg"}} <-- nested validation
+;; => [[:foo :bar] ("msg")] [[:foo :baz] ("msg")]
+;;
+;; [:max-age :contacts] {2-arg-constraint {[[] 0] {2-arg-constraint}}} <-- collection
+;; => [:max-age ("msg")] [[:contacts 0] ("msg")]
 
 
 (defn- unpack
   "Takes possibly nested validation results and creates a seq of pairs where
-   the first item is a path and the second a seq of messages. The paths of
-   nested validation results will be prefixed with the path to the
-   data that corresponds to the validation results."
+  the first item is a path and the second a seq of messages. The paths of
+  nested validation results will be prefixed with the path to the
+  data that corresponds to the validation results."
   ([validation-results]
      (unpack nil validation-results))
   ([prefix validation-results]
@@ -144,10 +74,10 @@
 
 (defn- render
   "Creates a localized human readable text from a message. The localizer-fn
-   is a one-arg function that maps the text-key of the message to a human
-   readable text.
-   Message can either be a string or a vector [text args] to fill the
-   placeholders."
+  is a one-arg function that maps the text-key of the message to a human
+  readable text.
+  Message can either be a string or a vector [text args] to fill the
+  placeholders."
   [localizer-fn msg]
   (if msg
     (let [[text args] (if (vector? msg) [(first msg) (rest msg)] [msg (list)])
@@ -163,9 +93,110 @@
     nil))
 
 
+(defn- values
+  "Returns the corresponding values for the given paths."
+  [data-provider paths data]
+  (map (partial data-provider data) paths))
+
+
+(defn- apply-constraints
+  "Applies the constraints from consconds to the values. The arity of
+  the functions in consconds must be at most the number of values.
+  Whenever a condition returns false all subsequent constraints are ignored.
+  Returns a map of {constraint-fn -> message-or-nil}."
+  [consconds values]
+  (->> consconds
+       (reduce (fn [[msgs ignore?] c]
+                 (let [msg (if ignore? nil (apply c values))]
+                   (case msg
+                         false [msgs true]
+                         true [msgs ignore?]
+                         [(assoc msgs c msg) ignore?])))
+               [{} false])
+       first))
+
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Public API
+
+(defn rule-set
+  "Creates a rule-set from paths, constraints and conditions.
+
+  The general structure of `specs` is:
+    path constraints-and-conditions+
+    path constraints-and-conditions+
+
+  A path points to data. It can either be a key, or a vector
+  containing keys. n paths are grouped by a vector to specify
+  multiple data locations that apply to n-arg constraints.
+
+  Examples:
+  :foo
+     Specifies a path to value in {:foo value}
+  [:foo :bar]
+    Specifies 2 paths to values in {:foo value1 :bar value2}
+  [[:foo :bar]]
+     Specifies a single path pointing to value in {:foo {:bar value}}
+  [:foo [:bar :baz :bum]]
+     Specifies 2 paths in {:foo value1 :bar {:baz {:bum value2}}}
+
+  Constraints are 1-arg functions that return a string to flag
+  a constraint violation for the given value.
+
+  Conditions are 1-arg predicates that stop application of subsequent
+  constraints.
+
+  Example:
+    (rule-set :foo required (min-length 3)
+              [[:bar :baz]] number? (in-range 0 10))
+ "
+  [ & specs]
+  (->> specs
+       (partition-by fn?)
+       (partition 2)
+       (map (fn [[paths consconds]]
+              [(-> paths first as-vector) (vec consconds)]))
+       (into {})))
+
+
+(defn sub-set
+  "Returns the subset of the rule-set that contains only those
+  rules that reference at least one of the paths given in ps."
+  [rule-set & ps]
+  (let [ps-set (set ps)]
+    (->> rule-set
+         (filter (fn [[paths consconds]]
+                   (not (empty? (cs/intersection ps-set (set paths))))))
+         (into {}))))
+
+
+(defn map-data-provider
+  "Default data provider that uses get or get-in to retrieve
+  data from a map/record."
+  [m keyword-or-vector]
+  (let [g (if (vector? keyword-or-vector) get-in get)]
+    (g m keyword-or-vector)))
+
+
+
+(defn validate
+  "Creates validation results by applying the constraints of the rule-set
+  to the data. If the data-provider arg is missing the map-data-provider
+  is used."
+  ([rule-set data]
+     (validate map-data-provider rule-set data))
+  ([data-provider rule-set data]
+     (->> rule-set
+          (map (fn [[paths consconds]]
+                 (let [vs (values data-provider paths data)]
+                   [paths (apply-constraints consconds vs)])))
+          (into {}))))
+
+
+
 (defn messages
   "Returns a map {path -> sequence-of-human-readable-strings}.
-   If the localizer-fn is not given the default-localizer is used."
+  If the localizer-fn is not given the default-localizer is used."
   ([validation-results]
      (messages i18n/default-localizer validation-results))
   ([localizer-fn validation-results]
@@ -190,20 +221,18 @@
 
 (defn has-errors?
   "Returns true if the validation results contain at least
-   one not-nil message."
+  one not-nil message."
   [validation-results]
   (not (empty? (messages validation-results))))
 
 
 (defn update
   "Takes two validation results (or any map) and recursively updates
-   the first with all values of the second. Existing values of the
-   first are kept."
+  the first with all values of the second. Existing values of the
+  first are kept."
   [old-map new-map]
   (reduce (fn [m [k nv]]
             (let [ov (get m k)]
               (assoc m k (if (map? ov) (update ov nv) nv))))
           old-map
           new-map))
-
-

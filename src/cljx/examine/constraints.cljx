@@ -1,7 +1,26 @@
 (ns examine.constraints
-  "Functions that yield constraints and a set of default constraints"
+  "Functions that yield constraints and a set of default constraints."
   (:require [clojure.string :as str])
   #+cljs (:import [goog.date Date]))
+
+
+(defn- index [xs]
+  (map vector (iterate inc 0) xs))
+
+
+(defn- as-seq [x]
+  (if (coll? x) (seq x) (list x)))
+
+
+(defn- cartesian-product [colls]
+  (if (< 1 (count colls))
+    (for [x (first colls) xs (cartesian-product (rest colls))]
+      (cons x xs))
+    (map list (first colls))))
+
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Public API
 
 
 (defn of-type?
@@ -130,21 +149,6 @@
          #+cljs (let [s (str re)]
                   (.substr s 1 (- (.-length s) 2)))])
       "string-required")))
-
-
-(defn- index [xs]
-  (map vector (iterate inc 0) xs))
-
-
-(defn- as-seq [x]
-  (if (coll? x) (seq x) (list x)))
-
-
-(defn- cartesian-product [colls]
-  (if (< 1 (count colls))
-    (for [x (first colls) xs (cartesian-product (rest colls))]
-      (cons x xs))
-    (map list (first colls))))
 
 
 (defn for-each

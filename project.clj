@@ -20,7 +20,6 @@
         :url "https://github.com/friemen/examine"}
   :repositories [["clojars" {:url "https://clojars.org/repo"
                              :creds :gpg}]]
-;  :hooks [cljx.hooks]
   :source-paths ["src/clj"]
   :test-paths ["target/clj" "target/clj-test"]
   :profiles {:dev {:plugins [[com.cemerick/austin "0.1.6"]]
