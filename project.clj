@@ -5,11 +5,8 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "1.7.48" :scope "provided"]]
-  ;:jar-exclusions [#"\.cljx"]
   :plugins [[codox "0.8.10"]
-            ;[org.clojars.frozenlock/cljx "0.4.6"]
-            [lein-cljsbuild "1.1.0"]
-            #_[com.cemerick/clojurescript.test "0.3.1"]]
+            [lein-cljsbuild "1.1.0"]]
   :codox {:defaults {}
           :sources ["src"]
           :exclude []
