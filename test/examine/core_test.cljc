@@ -2,14 +2,35 @@
   (:refer-clojure :exclude [update])
   (:require #? (:clj [clojure.test :refer :all]
                 :cljs [cljs.test :as t])
-            #? (:clj [examine.core :refer :all])
+            #? (:clj [examine.core :as e :refer :all])
             #? (:clj [examine.macros :refer [defvalidator]])
             #? (:cljs [examine.core :refer [map-data-provider messages messages-for rule-set sub-set update validate]])
             [examine.constraints :refer [for-each from-pred in-range is-boolean is-date is-number is-string
                                          matches-re max-length min-length min-le-max not-blank?
-                                         no-exception one-of]])
+                                         no-exception one-of required]])
   #? (:cljs (:require-macros [cljs.test :refer (is are deftest testing)]
                              [examine.macros :refer [defvalidator]])))
+
+#?
+(:clj
+ (deftest apply-constraints-test
+   (let [exceeds-constraint (from-pred #(> 50 %) "exceeds-50")]
+     (are [value consconds msgs] (= msgs (#'e/apply-constraints consconds [value]))
+       42 [is-number number? exceeds-constraint]
+       {is-number nil
+        exceeds-constraint nil}
+
+       51 [is-number number? exceeds-constraint]
+       {is-number nil
+        exceeds-constraint "exceeds-50"}
+
+       "foo" [is-number number? exceeds-constraint]
+       {is-number "number-required"
+        exceeds-constraint nil}
+
+       "foo" [[is-number "not-a-number"] number? exceeds-constraint]
+       {is-number "not-a-number"
+        exceeds-constraint nil}))))
 
 
 (deftest rule-set-test
@@ -132,16 +153,27 @@
        {:foo 42}                 {}                        {:foo 42}
        {:foo 42}                 {:foo 42}                 nil
        {:foo 43}                 {:foo 42}                 {:foo 43}
+       {:foo {:bar 43}}          {:foo {:bar 43}}          {:foo {}}
        {:foo {:bar 43 :baz 10}}  {:foo {:bar 42 :baz 10}}  {:foo {:bar 43}})
-  (let [rules (rule-set :foo is-number :bar is-string :baz not-blank? (min-length 4))
-        vr1 (validate map-data-provider rules {:foo "" :bar "" :baz "123"})
-        vr2 (validate map-data-provider rules {:foo 42 :bar ""})]
-    (is (= {} (messages (update vr1 vr2))))
+  (let [rules (rule-set :foo is-number
+                        :bar is-string
+                        :baz not-blank? (min-length 4))
+        vr1 (validate rules
+                      {:foo "" :bar "" :baz "123"})
+        vr2 (validate rules
+                      {:foo 42 :bar ""})]
+    (is (= {}
+           (messages (update vr1 vr2))))
+
     (is (= {:foo '("Must be a number")
-            :baz '("Min 4 characters required")} (messages (update vr2 vr1))))))
+            :baz '("Min 4 characters required")}
+           (messages (update vr2 vr1))))))
 
 
-(defvalidator v :foo is-string)
+(defvalidator v1 :foo is-string)
+
+(defvalidator v2 :bar [is-number "I need a number!!"])
 
 (deftest defvalidator-test
-  (is (= {:foo '("Must be a string")} (v {:foo 42}))))
+  (is (= {:foo '("Must be a string")} (v1 {:foo 42})))
+  (is (= {:bar '("I need a number!!")} (v2 {:bar "bar"}))))

@@ -77,7 +77,7 @@ There are three important functions in the examine.core namespace:
   results, the expression `(messages validation-results)` creates a
   map {path -> seq-of-texts}.
 
-The `examine.macros/defvalidator` macro combines those functions to define a 1-arg 
+The `examine.macros/defvalidator` macro combines those functions to define a 1-arg
 function that returns a map with human readable texts.
 
 
@@ -89,7 +89,7 @@ Examples for rule-set specifications:
 (def r (rule-set :firstname required is-string
                  :lastname is-string))
 ```
-applies constraint functions `required` and `is-string` to a value 
+applies constraint functions `required` and `is-string` to a value
 retrieved using `:firstname` keyword. A value retrieved by keyword
 `:lastname` is only checked by `is-string`.
 
@@ -107,9 +107,9 @@ by navigating a data structure using `:address` and `:zipcode`
 in that order.
 
 ```clojure
-(def r (rule-set :age is-number number? (in-range 0 120))
+(def r (rule-set :age is-number number? (in-range 0 120)))
 ```
-applies first the `is-number` constraint, and applies the `in-range` 
+applies first the `is-number` constraint, and applies the `in-range`
 constraint only if the predicate `number?` returns true.
 
 You can define ad-hoc constraints like this
@@ -123,7 +123,7 @@ You can define ad-hoc constraints like this
 which behaves like this
 
 ```clojure
-(check-address {:foo {:n1 1} :n2 2})
+(check-numbers {:foo {:n1 1} :n2 2})
 ;= {[:foo :n1] ("n1 must not be below n2"),
 ;   :n2 ("n1 must not be below n2")}
 ```
@@ -131,15 +131,28 @@ You get the same message for both values because any one of them
 could be erroneous.
 
 
+If you want a constraint to return a different message than the
+one it usually returns you can add the message within the rule-set
+specification, for example:
+
+```clojure
+(def r (rule-set :age is-number number? [(in-range 0 120) "human-age-required"]))
+
+
+(messages {"human-age-required" "Please specify a reasonable human age"}
+          (validate r {:age 150}))
+;= {:age ("Please specify a reasonable human age")}
+```
+
 
 ### Samples
 
-See the [samples](test/examine/samples.cljx) to learn more about
+See the [samples](test/examine/samples.cljc) to learn more about
 how examine can be used.
 
 ## Concepts
 
-A *path* points to a value. 
+A *path* points to a value.
 For maps, usually a keyword denotes the path to a piece of data.
 But a path can also be a vector of keywords that navigates into a
 nested structure.
@@ -147,9 +160,9 @@ nested structure.
 A *value-provider* is a function that takes a path as single argument
 and returns the corresponding value.
 
-A *constraint* is a function that takes one or more arguments, and 
+A *constraint* is a function that takes one or more arguments, and
 returns nil if the data is valid. Otherwise it returns either a
-message or a validation-result. 
+message or a validation-result.
 
 A *condition* is a predicate. Conditions are used to stop application
 of constraints after a condition returned false.
@@ -158,21 +171,21 @@ A *rule* is a pair of a path vector and a vector of constraints
 and conditions. If a condition returns false for the data all subsequent
 constraints and conditions will be ignored.
 
-A *rule-set* is a map {path-vector -> constraint-condition-vector}. 
+A *rule-set* is a map {path-vector -> constraint-condition-vector}.
 
 A *message* is a string or a vector. If it is a vector the first
 item must be a string and all subsequent items are values.
-The string denotes a key that has to be translated to human readable 
+The string denotes a key that has to be translated to human readable
 text by a localizer. The values are used to replace placeholders in
 the localized text.
 
 A *localizer* is a function that takes one key and returns a human
-readable text, possibly containing placeholders (see 
+readable text, possibly containing placeholders (see
 java.text.MessageFormat).
 
 A *validation-result* is a map of the following form:
     {data-path -> {constraint -> message}}.
-If a message is nil then the validation for data-path + constraint 
+If a message is nil then the validation for data-path + constraint
 was successful.
 
 
@@ -182,7 +195,7 @@ Namespaces:
 
 * core -- Contains validation functions.
 * constraints -- Contains concrete constraints.
-* internationalization -- Contains default localizer using resource bundles. 
+* internationalization -- Contains default localizer using resource bundles.
 
 ### Namespace core
 
@@ -202,14 +215,14 @@ Creates a rule-set from a given rule-set that contains only constraints that
 apply to the given paths.
 
 **update** --
-Creates a validation-result from the first argument by recursively adding all 
+Creates a validation-result from the first argument by recursively adding all
 validation-results from the second argument.
 
 **messages** --
 Returns a map of all message seqs from the given validation-result.
 
 **messages-for** --
-Returns a sequence of all messages from the given validation-result 
+Returns a sequence of all messages from the given validation-result
 that apply to the given path.
 
 **validate** --
@@ -258,7 +271,7 @@ Predicates stop further validation when they return false.
 
 ### Namespace internationalization
 
-**load-messages-map** -- Loads a property file messages_XY.properties from classpath 
+**load-messages-map** -- Loads a property file messages_XY.properties from classpath
 and returns a map (only Clojure, not ClojureScript).
 
 **default-language** -- Returns the language code using Javas
@@ -274,6 +287,6 @@ translation.
 
 # License
 
-Copyright 2013, 2014 F.Riemenschneider
+Copyright 2016 F.Riemenschneider
 
 Distributed under the Eclipse Public License, the same as Clojure.

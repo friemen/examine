@@ -107,14 +107,30 @@
   [consconds values]
   (->> consconds
        (reduce (fn [[msgs ignore?] c]
-                 (let [msg (if ignore? nil (apply c values))]
+                 ;; c is either
+                 ;;  - a constraint-fn (returning string or nil)
+                 ;;  - a condition (returning true or false)
+                 ;;  - a vector [constraint-fn alternative-message]
+                 (let [constraint-fn (if (vector? c) (first c) c)
+                       msg           (if-not ignore? (apply constraint-fn values))]
                    (case msg
-                         false [msgs true]
-                         true [msgs ignore?]
-                         [(assoc msgs c msg) ignore?])))
+                     false [msgs true]
+                     true  [msgs ignore?]
+                     nil   [(assoc msgs constraint-fn nil) ignore?]
+                     (let [msg (if (vector? c) (second c) msg)]
+                       [(assoc msgs constraint-fn msg) ignore?]))))
                [{} false])
-       first))
+       (first)))
 
+
+(defn constraint-or-condition?
+  "Returns true if x is either a function or a vector [fn
+  alternative-message]."
+  [x]
+  (or (fn? x)
+      (and (vector? x)
+           (-> x first fn?)
+           (-> x second string?))))
 
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public API
@@ -141,10 +157,10 @@
      Specifies 2 paths in {:foo value1 :bar {:baz {:bum value2}}}
 
   Constraints are 1-arg functions that return a string to flag
-  a constraint violation for the given value.
+  a constraint violation for the given value or nil otherwise.
 
-  Conditions are 1-arg predicates that stop application of subsequent
-  constraints.
+  Conditions are 1-arg predicates returning true or false that stop
+  application of subsequent constraints after returning false.
 
   Example:
     (rule-set :foo required (min-length 3)
@@ -152,7 +168,7 @@
  "
   [ & specs]
   (->> specs
-       (partition-by fn?)
+       (partition-by constraint-or-condition?)
        (partition 2)
        (map (fn [[paths consconds]]
               [(-> paths first as-vector) (vec consconds)]))

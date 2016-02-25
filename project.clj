@@ -1,4 +1,4 @@
-(defproject examine "1.2.1"
+(defproject examine "1.3.0-SNAPSHOT"
   :description "Validating Clojure data"
   :url "https://github.com/friemen/examine"
   :license {:name "Eclipse Public License"
@@ -6,7 +6,7 @@
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "1.7.48" :scope "provided"]]
   :plugins [[codox "0.8.10"]
-            [lein-cljsbuild "1.1.0"]]
+            [lein-cljsbuild "1.1.2"]]
   :codox {:defaults {}
           :sources ["src"]
           :exclude []
