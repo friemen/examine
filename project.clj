@@ -1,4 +1,4 @@
-(defproject examine "1.3.0"
+(defproject examine "1.3.1"
   :description "Validating Clojure data"
   :url "https://github.com/friemen/examine"
   :license {:name "Eclipse Public License"

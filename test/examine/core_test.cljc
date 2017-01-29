@@ -5,9 +5,10 @@
             #? (:clj [examine.core :as e :refer :all])
             #? (:clj [examine.macros :refer [defvalidator]])
             #? (:cljs [examine.core :refer [map-data-provider messages messages-for rule-set sub-set update validate]])
-            [examine.constraints :refer [for-each from-pred in-range is-boolean is-date is-number is-string
-                                         matches-re max-length min-length min-le-max not-blank?
-                                         no-exception one-of required]])
+               [examine.constraints :refer [for-each from-pred in-range
+                                            is-boolean is-date is-integer is-number is-string
+                                            matches-re max-length min-length min-le-max not-blank?
+                                            no-exception one-of required]])
   #? (:cljs (:require-macros [cljs.test :refer (is are deftest testing)]
                              [examine.macros :refer [defvalidator]])))
 
@@ -100,14 +101,20 @@
 
 
 (deftest nested-validation-test
-  (let [address-rules (rule-set :street-nr is-string
-                                :zipcode (max-length 5)
-                                [:from :to] min-le-max)
-        person-rules  (rule-set :address (partial validate address-rules))]
+  (let [address-rules
+        (rule-set :street-nr is-string
+                  :zipcode (max-length 5)
+                  [:from :to] min-le-max)
+
+        person-rules
+        (rule-set :address (partial validate address-rules))]
+
     (are [vr data] (= vr (messages (validate person-rules data)))
          {[:address :zipcode] '("Max 5 characters allowed")}
          {:address {:street-nr "" :zipcode "123456" :from 2 :to 3}}
-         {[:address :from] '("Minmax violation") [:address :to] '("Minmax violation")}
+
+         {[:address :from] '("Minmax violation")
+          [:address :to] '("Minmax violation")}
          {:address {:street-nr "" :zipcode "" :from 5 :to 3}})))
 
 
@@ -127,6 +134,22 @@
           [:contacts 1] '("age-too-high")}  {:max-age 100
                                              :contacts [{:name "Donald" :age 40}
                                                         {:name "Mickey" :age 101}]})))
+
+(deftest nested-validation-with-collection-test
+  (let [person
+        {:contacts [{:name "Donald" :age "40"}
+                    {:name "Mickey" :age false}
+                    {:name "Daisy"  :age 25}]}
+
+        contact-rules
+        (rule-set :age required is-integer)
+
+        person-rules
+        (rule-set :contacts (for-each (partial validate contact-rules)))]
+
+    (is (= {[:contacts 0 :age] '("Must be an integer number"),
+            [:contacts 1 :age] '("Must be an integer number")}
+           (messages (validate person-rules person))))))
 
 #?
 (:clj

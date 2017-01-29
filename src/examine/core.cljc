@@ -61,15 +61,15 @@
   nested validation results will be prefixed with the path to the
   data that corresponds to the validation results."
   ([validation-results]
-     (unpack nil validation-results))
+   (unpack nil validation-results))
   ([prefix validation-results]
-     (mapcat (fn [[paths msgmap]]
-               (let [{nested-vrs true
-                      string-msgs false} (->> msgmap vals without-nil (group-by map?))]
-                 (apply concat
-                        (paths-msgs-pairs prefix paths string-msgs)
-                        (map (partial unpack paths) nested-vrs))))
-             validation-results)))
+   (mapcat (fn [[paths msgmap]]
+             (let [{nested-vrs  true
+                    string-msgs false} (->> msgmap vals without-nil (group-by map?))]
+               (apply concat
+                      (paths-msgs-pairs prefix paths string-msgs)
+                      (map (partial unpack (concat prefix paths)) nested-vrs))))
+           validation-results)))
 
 
 (defn- render
@@ -217,7 +217,7 @@
      (messages i18n/default-localizer validation-results))
   ([localizer-fn validation-results]
      (->> validation-results
-          unpack
+          (unpack)
           (group-by first)
           (map (fn [[path msg-pairs]]
                  [path (->> msg-pairs
