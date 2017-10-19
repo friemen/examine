@@ -62,7 +62,7 @@
 
 
 (def required
-  "Constraint-fn that passes if value is not nil."
+  "Constraint-fn that passes if value is not blank."
   (from-pred not-blank? "value-required"))
 
 

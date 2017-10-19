@@ -246,7 +246,7 @@ a constraint that returns the exception message text if any is thrown.
 
 **Concrete constraints**:
 
-* required -- Value must not be nil
+* required -- Value must not be blank
 * has-items -- Collection is not empty
 * is-string -- Value is a string
 * is-number -- Value is a number
