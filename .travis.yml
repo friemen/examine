@@ -1,7 +1,5 @@
-sudo: false
 language: clojure
 script:
 - lein test
-- lein all test
 jdk:
 - openjdk8
