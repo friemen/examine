@@ -1,7 +1,7 @@
 (ns examine.core
   "Function for creation of rule-sets, validating, and using validation results"
   (:refer-clojure :exclude [update])
-  (:require [clojure.set :as cs]
+  (:require [clojure.set :as set]
             [examine.internationalization :as i18n])
   (:import #? (:clj  [java.text MessageFormat]
                :cljs [goog.i18n MessageFormat])))
@@ -21,6 +21,12 @@
   "Removes duplicates and the value nil from the sequence xs."
   [xs]
   (seq (disj (set xs) nil)))
+
+
+(defn- vector-keys?
+  "Returns true if map `m` contains only vector keys."
+  [m]
+  (->> (keys m) (every? vector?)))
 
 
 (defn- path-msgs-pair
@@ -65,7 +71,11 @@
   ([prefix validation-results]
    (mapcat (fn [[paths msgmap]]
              (let [{nested-vrs  true
-                    string-msgs false} (->> msgmap vals without-nil (group-by map?))]
+                    string-msgs false}
+                   (->> msgmap
+                        (vals)
+                        (without-nil)
+                        (group-by (every-pred map? vector-keys?)))]
                (apply concat
                       (paths-msgs-pairs prefix paths string-msgs)
                       (map (partial unpack (concat prefix paths)) nested-vrs))))
@@ -76,21 +86,19 @@
   "Creates a localized human readable text from a message. The localizer-fn
   is a one-arg function that maps the text-key of the message to a human
   readable text.
-  Message can either be a string or a vector [text args] to fill the
-  placeholders."
+  Message can either be a string, a vector [text & args] or a map with entries :text and :args.
+  The args are used to fill the placeholders."
   [localizer-fn msg]
-  (if msg
-    (let [[text args] (if (vector? msg) [(first msg) (rest msg)] [msg (list)])
-          localized-text (localizer-fn text)]
-      (if (and localized-text args)
-        #? (:clj (MessageFormat/format localized-text (to-array args))
-            :cljs (-> (MessageFormat. localized-text)
-                       (.format (->> args
-                                     (map vector (range))
-                                     (into {})
-                                     (clj->js)))))
-        text))
-    nil))
+  (when msg
+    (let [[text args]    (cond (vector? msg)
+                               [(first msg) (rest msg)]
+                               :else
+                               [msg []])
+          localized-text (when (and localizer-fn text)
+                           (localizer-fn text))]
+      (if (and (string? text) localized-text args)
+        (MessageFormat/format localized-text (to-array args))
+        text))))
 
 
 (defn- values
@@ -182,7 +190,7 @@
   (let [ps-set (set ps)]
     (->> rule-set
          (filter (fn [[paths consconds]]
-                   (not (empty? (cs/intersection ps-set (set paths))))))
+                   (not (empty? (set/intersection ps-set (set paths))))))
          (into {}))))
 
 

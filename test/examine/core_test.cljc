@@ -75,11 +75,21 @@
 #?
 (:clj
  (deftest unpack-test
-   (are [r   vrs] (= r (#'examine.core/unpack vrs))
-     '() {}
-     '([:foo ["C1"]]) {[:foo] {:c1 "C1"}}
-     '([:foo ["C1" "C2"]] [:bar ["C1" "C2"]]) {[:foo :bar] {:c1 "C1" :c2 "C2"}}
-     '([[:foo :baz] ["C2"]]) {[:foo] {:c1 {[:baz] {:c2 "C2"}}}})))
+   (are [vrs r] (= r (#'examine.core/unpack vrs))
+     {}
+     '()
+
+     {[:foo] {:c1 "C1"}}
+     '([:foo ["C1"]])
+
+     {[:foo :bar] {:c1 "C1" :c2 "C2"}}
+     '([:foo ["C1" "C2"]] [:bar ["C1" "C2"]])
+
+     {[:foo] {:c1 {[:baz] {:c2 "C2"}}}}
+     '([[:foo :baz] ["C2"]])
+
+     {[:foo] {:c1 {:type :warning :text "C1"}}}
+     '([:foo [{:type :warning :text "C1"}]]))))
 
 
 (deftest simple-validation-test
@@ -154,10 +164,12 @@
 #?
 (:clj
  (deftest render-test
-   (are [text        msg] (= text (#'examine.core/render identity msg))
-     "foo"        "foo"
-     "foo"        ["foo"]
-     "foo 42 13"  ["foo {1} {0}" 13 42])))
+   (are [msg text] (= text (#'examine.core/render identity msg))
+     "foo"                               "foo"
+     ["foo"]                             "foo"
+     ["foo {1} {0}" 13 42]               "foo 42 13"
+     ;; else leave message as provided by constraint
+     {:type :warning :message "foo"}     {:type :warning :message "foo"})))
 
 
 (deftest messages-for-test

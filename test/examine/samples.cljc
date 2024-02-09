@@ -22,15 +22,15 @@
 
 
 (deftest simple
-  (is (= (examine-contact (Person. nil "Bar"))
-         {}))
+  (is (= {}
+         (examine-contact (Person. nil "Bar"))))
 
   (is (every? #{"A value is required" "Must be a string"}
               (-> (Person. nil nil) (examine-contact) :lastname)))
 
-  (is (= (examine-contact (Person. 42 13))
-         {:firstname '("Must be a string")
-          :lastname '("Must be a string")})))
+  (is (= {:firstname '("Must be a string")
+          :lastname '("Must be a string")}
+         (examine-contact (Person. 42 13)))))
 
 
 ;; The second sample shows how navigation within a data structure is supported
@@ -41,16 +41,16 @@
                         :city "Duckberg"}}
         rules (e/rule-set
                [[:address :zipcode]] (c/matches-re #"\d{5}"))]
-    (is (= (->> data (e/validate rules) e/messages)
-           {[:address :zipcode] '("Must match pattern \\d{5}")})))
+    (is (= {[:address :zipcode] '("Must match pattern \\d{5}")}
+           (->> data (e/validate rules) e/messages))))
 
   (let [data {:validity {:min 3
                          :max 2}}
         rules (e/rule-set
                [[:validity :min] [:validity :max]] c/min-le-max)]
-    (is (= (->> data (e/validate rules) e/messages)
-           {[:validity :min] '("Minmax violation")
-            [:validity :max] '("Minmax violation")}))))
+    (is (= {[:validity :min] '("Minmax violation")
+            [:validity :max] '("Minmax violation")}
+           (->> data (e/validate rules) e/messages)))))
 
 
 ;; The third sample demonstrates how rule-sets can be applied in a nested fashion
@@ -62,6 +62,18 @@
                       [:min :max] c/min-le-max)
         rules (e/rule-set
                :validity (partial e/validate detail-rules))]
-    (is (= (->> data (e/validate rules) e/messages)
-           {[:validity :min] '("Minmax violation")
-            [:validity :max] '("Minmax violation")}))))
+    (is (= {[:validity :min] '("Minmax violation")
+            [:validity :max] '("Minmax violation")}
+           (->> data (e/validate rules) e/messages)))))
+
+
+;; This sample shows that constraints can just return maps instead of strings or vectors
+
+(deftest map-messages
+  (let [age-constraint (fn [age]
+                       (if-not (< 0 age 120)
+                         {:type :warning :text "age is not within usual values"}))
+        rules (e/rule-set
+               :age age-constraint)]
+    (is (= {:age '({:type :warning, :text "age is not within usual values"})}
+           (->> {:age 121} (e/validate rules) (e/messages))))))
