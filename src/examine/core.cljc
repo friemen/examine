@@ -97,7 +97,13 @@
           localized-text (when (and localizer-fn text)
                            (localizer-fn text))]
       (if (and (string? text) localized-text args)
-        (MessageFormat/format localized-text (to-array args))
+        #? (:clj (MessageFormat/format localized-text (to-array args))
+            :cljs (-> (MessageFormat. localized-text)
+                      (.format (->> args
+                                    (map vector (range))
+                                    (into {})
+                                    (clj->js)))))
+
         text))))
 
 
@@ -108,8 +114,8 @@
 
 
 (defn- apply-constraints
-  "Applies the constraints from consconds to the values. The arity of
-  the functions in consconds must be at most the number of values.
+  "Applies the constraints from `consconds` to the values. The arity of
+  the functions in `consconds` must be at most the number of values.
   Whenever a condition returns false all subsequent constraints are ignored.
   Returns a map of {constraint-fn -> message-or-nil}."
   [consconds values]

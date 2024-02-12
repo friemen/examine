@@ -12,11 +12,10 @@
   #? (:cljs (:require-macros [cljs.test :refer (is are deftest testing)]
                              [examine.macros :refer [defvalidator]])))
 
-#?
-(:clj
- (deftest apply-constraints-test
+
+(deftest apply-constraints-test
    (let [exceeds-constraint (from-pred #(> 50 %) "exceeds-50")]
-     (are [value consconds msgs] (= msgs (#'e/apply-constraints consconds [value]))
+     (are [value consconds msgs] (= msgs (#'examine.core/apply-constraints consconds [value]))
        42 [is-number number? exceeds-constraint]
        {is-number nil
         exceeds-constraint nil}
@@ -31,7 +30,7 @@
 
        "foo" [[is-number "not-a-number"] number? exceeds-constraint]
        {is-number "not-a-number"
-        exceeds-constraint nil}))))
+        exceeds-constraint nil})))
 
 
 (deftest rule-set-test
@@ -60,9 +59,7 @@
          42     :baz
          13     [:bam 1])))
 
-#?
-(:clj
- (deftest paths-msgs-pairs-test
+(deftest paths-msgs-pairs-test
    (are [pairs prefix paths] (= pairs (#'examine.core/paths-msgs-pairs prefix paths '("!")))
      '([:foo ("!")]) nil [:foo]
      '([:foo ("!")] [:bar ("!")]) nil [:foo :bar]
@@ -70,11 +67,10 @@
      '([:baz ("!")]) [:baz] [[]]
      '([[:baz :bar] ("!")]) [[:baz :bar]] [[]]
      '([[:baz :bar :foo] ("!")]) [[:baz :bar]] [:foo]
-     '([[:foo :baz] ("!")] [:bar ("!")]) [:foo :bar] [:baz []])))
+     '([[:foo :baz] ("!")] [:bar ("!")]) [:foo :bar] [:baz []]))
 
-#?
-(:clj
- (deftest unpack-test
+
+(deftest unpack-test
    (are [vrs r] (= r (#'examine.core/unpack vrs))
      {}
      '()
@@ -89,7 +85,7 @@
      '([[:foo :baz] ["C2"]])
 
      {[:foo] {:c1 {:type :warning :text "C1"}}}
-     '([:foo [{:type :warning :text "C1"}]]))))
+     '([:foo [{:type :warning :text "C1"}]])))
 
 
 (deftest simple-validation-test
@@ -139,11 +135,12 @@
 (deftest collection-validation-test
   (let [age (from-pred #(> %1 (:age %2)) "age-too-high")
         rules (rule-set [:max-age :contacts] (for-each age))]
-    (are [vr                               data] (= vr (messages (validate rules data)))
+    (are [vr data] (= vr (messages (validate rules data)))
          {:max-age '("age-too-high")
-          [:contacts 1] '("age-too-high")}  {:max-age 100
-                                             :contacts [{:name "Donald" :age 40}
-                                                        {:name "Mickey" :age 101}]})))
+          [:contacts 1] '("age-too-high")}
+         {:max-age 100
+          :contacts [{:name "Donald" :age 40}
+                     {:name "Mickey" :age 101}]})))
 
 (deftest nested-validation-with-collection-test
   (let [person
@@ -161,15 +158,14 @@
             [:contacts 1 :age] '("Must be an integer number")}
            (messages (validate person-rules person))))))
 
-#?
-(:clj
- (deftest render-test
-   (are [msg text] (= text (#'examine.core/render identity msg))
-     "foo"                               "foo"
-     ["foo"]                             "foo"
-     ["foo {1} {0}" 13 42]               "foo 42 13"
-     ;; else leave message as provided by constraint
-     {:type :warning :message "foo"}     {:type :warning :message "foo"})))
+
+(deftest render-test
+ (are [msg text] (= text (#'examine.core/render identity msg))
+   "foo"                               "foo"
+   ["foo"]                             "foo"
+   ["foo {1} {0}" 13 42]               "foo 42 13"
+   ;; else leave message as provided by constraint
+   {:type :warning :message "foo"}     {:type :warning :message "foo"}))
 
 
 (deftest messages-for-test

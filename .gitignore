@@ -18,3 +18,4 @@ pom.xml
 /.nrepl-port
 /.repl/
 /.lein-repl-history
+/.cljs_node_repl/
