@@ -2,8 +2,6 @@
 
 Validating Clojure(Script) data.
 
-[![Build Status](https://travis-ci.org/friemen/examine.png?branch=master)](https://travis-ci.org/friemen/examine)
-
 [![Clojars Project](http://clojars.org/examine/latest-version.svg)](http://clojars.org/examine)
 
 Include a dependency to the latest version as shown above in your project.clj.
