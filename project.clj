@@ -1,4 +1,4 @@
-(defproject examine "1.3.2-SNAPSHOT"
+(defproject examine "1.3.3"
   :description
   "Validating Clojure data"
   :url
