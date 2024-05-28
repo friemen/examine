@@ -144,7 +144,8 @@
   (or (fn? x)
       (and (vector? x)
            (-> x first fn?)
-           (-> x second string?))))
+           (or (-> x second string?)
+               (-> x second map?)))))
 
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public API
@@ -263,6 +264,6 @@
   [old-map new-map]
   (reduce (fn [m [k nv]]
             (let [ov (get m k)]
-              (assoc m k (if (map? ov) (update ov nv) nv))))
+              (assoc m k (if (and (map? ov) (map? nv)) (update ov nv) nv))))
           old-map
           new-map))

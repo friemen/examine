@@ -186,30 +186,44 @@
     {:foo 43}                {:foo 42}                {:foo 43}
     {:foo {:bar 43}}         {:foo {:bar 43}}         {:foo {}}
     {:foo {:bar 43 :baz 10}} {:foo {:bar 42 :baz 10}} {:foo {:bar 43}})
-  (let [rules (rule-set :foo is-number
-                        :bar is-string
-                        :baz not-blank? (min-length 4))
-        vr1   (validate rules
-                        {:foo "" :bar "" :baz "123"})
-        vr2   (validate rules
-                        {:foo 42 :bar ""})]
-    (is (= {}
-           (messages (update vr1 vr2))))
+  (testing "updating validation results with standard messages"
+    (let [rules (rule-set :foo is-number
+                          :bar is-string
+                          :baz not-blank? (min-length 4))
+          vr1   (validate rules
+                          {:foo "" :bar "" :baz "123"})
+          vr2   (validate rules
+                          {:foo 42 :bar ""})]
+      (is (= {}
+             (messages (update vr1 vr2))))
 
-    (is (= {:foo '("Must be a number")
-            :baz '("Min 4 characters required")}
-           (messages (update vr2 vr1)))))
-  (let [rules (rule-set [[:foo :bar]] [(matches-re #"abcd") "custom-message"])
-        vr1   (-> rules
-                  (sub-set [:foo :bar])
-                  (validate  {:foo {:bar "abc"}}))
-        vr2   (-> rules
-                  (sub-set [:foo :bar])
-                  (validate {:foo {:bar "abcd"}}))]
-    (is (= {[:foo :bar] '("custom-message")}
-           (messages vr1)))
-    (is (= {}
-           (messages (update vr1 vr2))))))
+      (is (= {:foo '("Must be a number")
+              :baz '("Min 4 characters required")}
+             (messages (update vr2 vr1))))))
+  (testing "updating validation results with a custom string message"
+    (let [rules (rule-set [[:foo :bar]] [(matches-re #"abcd") "custom-message"])
+          vr1   (-> rules
+                    (sub-set [:foo :bar])
+                    (validate  {:foo {:bar "abc"}}))
+          vr2   (-> rules
+                    (sub-set [:foo :bar])
+                    (validate {:foo {:bar "abcd"}}))]
+      (is (= {[:foo :bar] '("custom-message")}
+             (messages vr1)))
+      (is (= {}
+             (messages (update vr1 vr2))))))
+  (testing "updating validation results with a message map"
+    (let [rules (rule-set [[:foo :bar]] [(matches-re #"abcd") {:type :error :text "custom-message"}])
+          vr1   (-> rules
+                    (sub-set [:foo :bar])
+                    (validate  {:foo {:bar "abc"}}))
+          vr2   (-> rules
+                    (sub-set [:foo :bar])
+                    (validate {:foo {:bar "abcd"}}))]
+      (is (= {[:foo :bar] '({:type :error :text "custom-message"})}
+             (messages vr1)))
+      (is (= {}
+             (messages (update vr1 vr2)))))))
 
 
 (defvalidator v1 :foo is-string)
