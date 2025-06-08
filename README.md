@@ -6,7 +6,7 @@ Validating Clojure(Script) data.
 
 Include a dependency to the latest version as shown above in your project.clj.
 
-[API docs](https://friemen.github.com/examine)
+[API docs](https://friemen.github.io/examine)
 
 
 ## Key Features
@@ -285,6 +285,6 @@ translation.
 
 # License
 
-Copyright 2016-2024 F.Riemenschneider
+Copyright 2016-2025 F.Riemenschneider
 
 Distributed under the Eclipse Public License, the same as Clojure.

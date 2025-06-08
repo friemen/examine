@@ -1,24 +1,27 @@
-(defproject examine "1.3.3"
+(defproject examine "1.3.4-SNAPSHOT"
   :description
   "Validating Clojure data"
+
   :url
   "https://github.com/friemen/examine"
+
   :license
   {:name "Eclipse Public License"
    :url  "http://www.eclipse.org/legal/epl-v10.html"}
+
   :dependencies
-  [[org.clojure/clojure "1.10.3"]
-   [org.clojure/clojurescript "1.10.914" :scope "provided"]]
+  [[org.clojure/clojure "1.12.1"]
+   [org.clojure/clojurescript "1.12.42" :scope "provided"]]
+
   :plugins
-  [[codox "0.10.7"]
+  [[lein-codox "0.10.8"]
    [lein-cljsbuild "1.1.8"]]
 
   :codox
-  {:defaults                  {}
-   :sources                   ["src"]
-   :exclude                   []
-   :src-dir-uri               "https://github.com/friemen/examine/blob/master/"
-   :src-linenum-anchor-prefix "L"}
+  {:language     :clojure
+   :source-paths ["src"]
+   :namespaces   [#"^examine"]
+   :source-uri   "https://github.com/friemen/examine/blob/master/{filepath}#L{line}"}
 
   :scm
   {:name "git"
@@ -33,8 +36,8 @@
    {:source-paths
     ["dev"]
     :dependencies
-    [[org.clojure/clojurescript "1.10.914"]
-     [cider/piggieback "0.5.3"]]
+    [[org.clojure/clojurescript "1.12.42"]
+     [cider/piggieback "0.6.0"]]
     :repl-options
     {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}}}
 
