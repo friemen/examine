@@ -285,6 +285,6 @@ translation.
 
 # License
 
-Copyright 2016-2025 F.Riemenschneider
+Copyright 2016-2026 F.Riemenschneider
 
 Distributed under the Eclipse Public License, the same as Clojure.

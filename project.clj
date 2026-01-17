@@ -10,8 +10,7 @@
    :url  "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies
-  [[org.clojure/clojure "1.12.1"]
-   [org.clojure/clojurescript "1.12.42" :scope "provided"]]
+  [[org.clojure/clojure "1.12.4"]]
 
   :plugins
   [[lein-codox "0.10.8"]
@@ -36,10 +35,11 @@
    {:source-paths
     ["dev"]
     :dependencies
-    [[org.clojure/clojurescript "1.12.42"]
-     [cider/piggieback "0.6.0"]]
+    [[org.clojure/clojurescript "1.12.134"]
+     [cider/piggieback "0.6.1"]]
     :repl-options
     {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}}}
 
   :aliases
-  {"deploy" ["do" "clean," "deploy" "clojars"]})
+  {"deploy"
+   ["do" "clean," "deploy" "clojars"]})
